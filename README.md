@@ -1,41 +1,43 @@
-# 🎨 AI Image Cartoonifier
+# 🎨 AI Image Converter & Avatar Creator
 
-A modern, beautiful web application that transforms your photos into stunning cartoon-style artwork using advanced AI technology. Built with React, Framer Motion, and Tailwind CSS.
-
-![AI Image Cartoonifier](https://img.shields.io/badge/React-19.1.0-blue?style=for-the-badge&logo=react)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.0-blue?style=for-the-badge&logo=tailwind-css)
-![Framer Motion](https://img.shields.io/badge/Framer_Motion-11.0-green?style=for-the-badge)
+Transform your photos into stunning cartoon-style artwork and create personalized avatars using advanced AI technology powered by DeepAI and DoppelMe.
 
 ## ✨ Features
 
-- 🎯 **Drag & Drop Interface** - Easy image upload with drag and drop functionality
-- 🤖 **AI-Powered Transformation** - Uses DeepAI's advanced machine learning algorithms
-- ⚡ **Lightning Fast** - Get your cartoonified image in seconds
-- 🎨 **Beautiful UI/UX** - Modern glassmorphism design with smooth animations
-- 📱 **Responsive Design** - Works perfectly on desktop, tablet, and mobile
-- 💾 **Easy Download** - Download your transformed images instantly
-- 🔄 **Real-time Preview** - See your original and transformed images side by side
-- 🎭 **Smooth Animations** - Powered by Framer Motion for delightful interactions
+### 🎨 AI Cartoonifier
+- 🖼️ **Drag & Drop Upload**: Easy image upload with drag and drop support
+- 🎨 **AI-Powered Cartoonification**: Advanced AI technology for high-quality results
+- 📱 **Responsive Design**: Works perfectly on desktop and mobile devices
+- ⚡ **Fast Processing**: Optimized for quick image processing
+- 💾 **Easy Download**: One-click download of your cartoonified images
 
-## 🚀 Live Demo
+### 🎭 DoppelMe Avatar Creator
+- 🎭 **Personalized Avatars**: Create unique avatars with AI-powered DoppelMe technology
+- 🎨 **Multiple Styles**: Choose from 8 different avatar styles (Cartoon, Anime, Pixel Art, etc.)
+- 🔧 **Customizable**: Set your own Avatar ID or use the default
+- 📥 **Retrieve Avatars**: Get existing avatars by ID
+- 💾 **Easy Download**: Download your created avatars instantly
 
-Experience the AI Image Cartoonifier in action! Upload any photo and watch it transform into a beautiful cartoon-style artwork.
+### 🛠️ General Features
+- 🛡️ **Error Handling**: Graceful error handling with user-friendly messages
+- 🔄 **Retry Logic**: Automatic retry with exponential backoff for better reliability
+- 🎯 **Tabbed Interface**: Switch between Cartoonifier and Avatar Creator seamlessly
+- 📱 **Responsive Design**: Beautiful UI that works on all devices
 
-## 🛠️ Technologies Used
+## 🚀 Quick Start
 
-- **React 19** - Modern React with hooks and functional components
-- **Vite** - Fast build tool and development server
-- **Tailwind CSS** - Utility-first CSS framework for styling
-- **Framer Motion** - Production-ready motion library for React
-- **Lucide React** - Beautiful & consistent icon toolkit
-- **Axios** - Promise-based HTTP client for API calls
-- **DeepAI API** - Advanced AI image processing
+### Prerequisites
 
-## 📦 Installation
+- Node.js (version 16 or higher)
+- npm or yarn
+- DeepAI API key (free)
+- RapidAPI key (free)
+
+### Installation
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone <your-repo-url>
    cd imgconverter
    ```
 
@@ -44,109 +46,203 @@ Experience the AI Image Cartoonifier in action! Upload any photo and watch it tr
    npm install
    ```
 
-3. **Start the development server**
+3. **Get your API keys**
+   - **DeepAI API key**: Go to [DeepAI.org](https://deepai.org/)
+   - **RapidAPI key**: Go to [RapidAPI.com](https://rapidapi.com/)
+   - Sign up for free accounts and generate API keys
+
+4. **Set up environment variables**
+   - Create a `.env` file in the root directory
+   - Add your API keys:
+   ```env
+   VITE_DEEPAI_API_KEY=your_deepai_api_key_here
+   VITE_RAPIDAPI_KEY=your_rapidapi_key_here
+   ```
+
+5. **Start the development server**
    ```bash
    npm run dev
    ```
 
-4. **Open your browser**
-   Navigate to `http://localhost:5173` to see the application
-
-## 🎯 Usage
-
-1. **Upload Image**: Drag and drop an image or click to browse files
-2. **Preview**: See your original image in the preview area
-3. **Transform**: Click "Cartoonify Now" to process your image with AI
-4. **Download**: Once processing is complete, download your cartoonified image
+6. **Open your browser**
+   - Navigate to `http://localhost:5173`
+   - Switch between tabs to use different features!
 
 ## 🔧 Configuration
 
-### API Key Setup
+### Environment Variables
 
-The application uses the DeepAI API for image transformation. Make sure you have a valid API key:
+Create a `.env` file in the root directory with the following variables:
 
-1. Sign up at [DeepAI](https://deepai.org/)
-2. Get your API key from the dashboard
-3. Replace the API key in `src/components/DeepAIImageModifier.jsx`:
+```env
+# Required: Your DeepAI API key (for cartoonification)
+VITE_DEEPAI_API_KEY=your_deepai_api_key_here
 
-```javascript
-'Api-Key': 'YOUR_API_KEY_HERE'
+# Required: Your RapidAPI key (for avatar creation)
+VITE_RAPIDAPI_KEY=your_rapidapi_key_here
+
+# Optional: API Configuration
+VITE_API_TIMEOUT=30000
+VITE_MAX_RETRIES=3
 ```
+
+### API Configuration
+
+- **VITE_DEEPAI_API_KEY**: Your DeepAI API key (required for cartoonification)
+- **VITE_RAPIDAPI_KEY**: Your RapidAPI key (required for avatar creation)
+- **VITE_API_TIMEOUT**: Request timeout in milliseconds (default: 30000)
+- **VITE_MAX_RETRIES**: Maximum retry attempts for failed requests (default: 3)
 
 ## 📁 Project Structure
 
 ```
 imgconverter/
-├── public/
 ├── src/
 │   ├── components/
-│   │   └── DeepAIImageModifier.jsx    # Main component
-│   ├── assets/
-│   ├── App.jsx                        # App entry point
-│   ├── main.jsx                       # React entry point
-│   └── index.css                      # Global styles
-├── tailwind.config.js                 # Tailwind configuration
-├── postcss.config.js                  # PostCSS configuration
-├── package.json                       # Dependencies and scripts
-└── README.md                          # This file
+│   │   ├── DeepAIImageModifier.jsx     # Cartoonifier component
+│   │   ├── DoppelMeAvatarCreator.jsx   # Avatar creator component
+│   │   └── ErrorBoundary.jsx           # Error handling
+│   ├── config/
+│   │   └── api.js                      # API configuration
+│   ├── utils/
+│   │   └── api.js                      # API utilities
+│   ├── App.jsx                         # Main app with tabbed interface
+│   └── main.jsx                        # Entry point
+├── public/                             # Static assets
+├── .env.example                        # Environment variables template
+├── package.json                        # Dependencies and scripts
+└── README.md                           # This file
 ```
 
-## 🎨 Customization
+## 🎯 Usage Guide
 
-### Styling
-The application uses Tailwind CSS with custom animations and glassmorphism effects. You can customize:
+### 🎨 AI Cartoonifier
 
-- Colors in `tailwind.config.js`
-- Animations in the config file
-- Component styles in `src/index.css`
+1. **Upload Image**
+   - Drag and drop an image onto the upload area
+   - Or click to browse and select a file
+   - Supported formats: JPEG, PNG, GIF, WebP (max 10MB)
 
-### Animations
-Framer Motion animations can be customized in the component files. The app includes:
+2. **Process Image**
+   - Click "Cartoonify Now!" to start processing
+   - Wait for the AI to transform your image
+   - Processing typically takes 10-30 seconds
 
-- Fade-in animations
-- Scale transitions
-- Floating background elements
-- Loading spinners
+3. **Download Result**
+   - Once processing is complete, click "Download Cartoonified Image"
+   - Your cartoonified image will be saved to your device
 
-## 🚀 Deployment
+### 🎭 DoppelMe Avatar Creator
 
-### Build for Production
-```bash
-npm run build
-```
+1. **Configure Avatar**
+   - Enter a unique Avatar ID or use the default
+   - Choose your preferred avatar style from the dropdown
+   - Available styles: Classic Cartoon, Anime, Pixel Art, Watercolor, Oil Painting, Sketch, Pop Art, Gothic
 
-### Deploy to Vercel
-1. Install Vercel CLI: `npm i -g vercel`
-2. Run: `vercel`
-3. Follow the prompts
+2. **Create Avatar**
+   - Click "Create Avatar" to generate a new avatar
+   - Or click "Get Avatar" to retrieve an existing one
+   - Wait for the avatar to be generated
 
-### Deploy to Netlify
-1. Build the project: `npm run build`
-2. Upload the `dist` folder to Netlify
+3. **Download Avatar**
+   - Once created, click "Download Avatar"
+   - Your personalized avatar will be saved to your device
+
+## 🛠️ Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
+
+## 🔍 Troubleshooting
+
+### Common Issues
+
+#### 1. "API Key Required" Error
+**Problem**: You see an API key warning message.
+
+**Solution**:
+- Make sure you have a `.env` file in the root directory
+- Ensure both API keys are correctly formatted
+- Restart the development server after adding the API keys
+
+#### 2. "API Key Invalid" Error
+**Problem**: API key is rejected by the service.
+
+**Solution**:
+- Get new API keys from [DeepAI.org](https://deepai.org/) and [RapidAPI.com](https://rapidapi.com/)
+- Make sure you're not using the example keys
+- Check if your accounts have available credits
+
+#### 3. "Network Error" or "Timeout Error"
+**Problem**: Connection issues with the APIs.
+
+**Solution**:
+- Check your internet connection
+- Try again in a few minutes
+- The app will automatically retry failed requests
+
+#### 4. "File Size Too Large" Error (Cartoonifier)
+**Problem**: Image file exceeds the 10MB limit.
+
+**Solution**:
+- Compress your image before uploading
+- Use a smaller image file
+- Convert to a more efficient format (JPEG, WebP)
+
+#### 5. "Invalid File Type" Error (Cartoonifier)
+**Problem**: Unsupported image format.
+
+**Solution**:
+- Use supported formats: JPEG, PNG, GIF, WebP
+- Convert your image to a supported format
+
+### Performance Tips
+
+- **Image Size**: Smaller images process faster in cartoonifier
+- **Format**: JPEG and WebP are most efficient
+- **Resolution**: Lower resolution images work well for cartoonification
+- **Internet**: Stable internet connection improves reliability
+- **Avatar ID**: Use unique IDs for different avatar styles
+
+## 🔒 Security
+
+- API keys are stored locally in `.env` files
+- `.env` files are automatically ignored by Git
+- Never commit your actual API keys to version control
+- The app only sends data to secure APIs
 
 ## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature-name`
-3. Commit your changes: `git commit -am 'Add feature'`
-4. Push to the branch: `git push origin feature-name`
-5. Submit a pull request
+3. Make your changes
+4. Commit your changes: `git commit -m 'Add feature'`
+5. Push to the branch: `git push origin feature-name`
+6. Submit a pull request
 
-## 📝 License
+## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## 🙏 Acknowledgments
 
-- [DeepAI](https://deepai.org/) for providing the AI image processing API
-- [Framer Motion](https://www.framer.com/motion/) for smooth animations
-- [Tailwind CSS](https://tailwindcss.com/) for the beautiful styling framework
-- [Lucide](https://lucide.dev/) for the beautiful icons
+- [DeepAI](https://deepai.org/) for providing the AI cartoonification API
+- [DoppelMe](https://doppelme.com/) for providing the avatar creation API
+- [RapidAPI](https://rapidapi.com/) for the API marketplace
+- [React](https://reactjs.org/) for the amazing framework
+- [Vite](https://vitejs.dev/) for the fast build tool
+- [Tailwind CSS](https://tailwindcss.com/) for the beautiful styling
 
 ## 📞 Support
 
-If you have any questions or need help, please open an issue on GitHub or contact us.
+If you encounter any issues or have questions, please:
+
+1. Check the troubleshooting section above
+2. Search existing issues in the repository
+3. Create a new issue with detailed information about your problem
 
 ---
 
-**Made with ❤️ using React and AI**
+**Happy creating! 🎨✨**

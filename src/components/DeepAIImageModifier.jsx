@@ -1,4 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { cartoonifyImage, isApiKeyValid } from '../utils/api';
+import { validateFile } from '../config/api';
 
 const DeepAIImageModifier = () => {
   const [image, setImage] = useState(null);
@@ -7,25 +9,26 @@ const DeepAIImageModifier = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [dragActive, setDragActive] = useState(false);
+  const [processingStep, setProcessingStep] = useState('');
+  const [apiKeyBanner, setApiKeyBanner] = useState(true);
   const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    if (isApiKeyValid()) setApiKeyBanner(false);
+  }, []);
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
     if (file) {
-      if (file.type.startsWith('image/')) {
-        // Check file size (max 10MB)
-        const maxSize = 10 * 1024 * 1024; // 10MB
-        if (file.size > maxSize) {
-          setError('File size too large. Please select an image smaller than 10MB.');
-          return;
-        }
-        setImage(file);
-        setPreviewUrl(URL.createObjectURL(file));
-        setModifiedImageUrl('');
-        setError('');
-      } else {
-        setError('Please select a valid image file.');
+      const validationErrors = validateFile(file);
+      if (validationErrors.length > 0) {
+        showToast(validationErrors[0]);
+        return;
       }
+      setImage(file);
+      setPreviewUrl(URL.createObjectURL(file));
+      setModifiedImageUrl('');
+      setError('');
     }
   };
 
@@ -48,49 +51,31 @@ const DeepAIImageModifier = () => {
     }
   };
 
+  const showToast = (msg) => {
+    setError(msg);
+    setTimeout(() => setError(''), 3500);
+  };
+
   const handleModifyImage = async () => {
     if (!image) return;
-    const apiKey = import.meta.env.VITE_DEEPAI_API_KEY;
-    if (!apiKey) {
-      setError('❌ No API key configured. Please add your DeepAI API key to the .env file.');
-      return;
-    }
     setLoading(true);
-    setError('');
+    setProcessingStep('Preparing image...');
     try {
-      const formData = new FormData();
-      formData.append('image', image);
-      const response = await fetch('https://api.deepai.org/api/toonify', {
-        method: 'POST',
-        headers: {
-          'Api-Key': apiKey,
-        },
-        body: formData,
-      });
-      if (!response.ok) {
-        const errorText = await response.text();
-        let errorMessage = 'Failed to process image.';
-        if (response.status === 401) {
-          errorMessage = 'API key is invalid or expired. Please get a new API key from https://deepai.org/';
-        } else if (response.status === 400) {
-          errorMessage = 'Invalid image format. Please try a different image.';
-        } else if (response.status === 429) {
-          errorMessage = 'Rate limit exceeded. Please try again later.';
-        } else if (response.status === 500) {
-          errorMessage = 'Server error. Please try again later.';
-        } else {
-          errorMessage = `API Error (${response.status}): ${errorText}`;
-        }
-        throw new Error(errorMessage);
+      if (!isApiKeyValid()) {
+        showToast('Please add your DeepAI API key to the .env file');
+        return;
       }
-      const result = await response.json();
+      setProcessingStep('Uploading to AI service...');
+      const result = await cartoonifyImage(image);
       if (result.output_url) {
         setModifiedImageUrl(result.output_url);
+        setProcessingStep('');
       } else {
-        throw new Error('No output URL received from API');
+        showToast('No output URL received from API');
       }
     } catch (error) {
-      setError(error.message || 'Failed to process image. Please try again.');
+      showToast(error.message || 'Failed to process image. Please try again.');
+      setProcessingStep('');
     } finally {
       setLoading(false);
     }
@@ -101,6 +86,7 @@ const DeepAIImageModifier = () => {
     setPreviewUrl('');
     setModifiedImageUrl('');
     setError('');
+    setProcessingStep('');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -119,6 +105,19 @@ const DeepAIImageModifier = () => {
 
   return (
     <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #1e293b 0%, #7c3aed 50%, #1e293b 100%)', padding: '20px', color: 'white' }}>
+      {/* API Key Banner */}
+      {apiKeyBanner && (
+        <div style={{ position: 'fixed', top: 80, left: 0, right: 0, zIndex: 50, background: 'rgba(239,68,68,0.95)', color: 'white', padding: '10px 0', textAlign: 'center', fontWeight: 600, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ marginRight: 8 }}>⚠️ API key is missing or invalid.</span>
+          <a href="https://deepai.org/" target="_blank" rel="noopener noreferrer" style={{ background: '#6366f1', color: 'white', padding: '4px 12px', borderRadius: 6, margin: '0 8px', textDecoration: 'none', fontWeight: 600 }}>Get Free API Key</a>
+          <span style={{ fontSize: 12, marginLeft: 8 }}>Set <code style={{ background: 'rgba(0,0,0,0.2)', padding: '2px 4px', borderRadius: 4 }}>VITE_DEEPAI_API_KEY</code> in your <code>.env</code> file.</span>
+          <button onClick={() => setApiKeyBanner(false)} style={{ marginLeft: 16, background: 'transparent', border: 'none', color: 'white', fontSize: 18, cursor: 'pointer' }}>&times;</button>
+        </div>
+      )}
+      {/* Toast for errors */}
+      {error && (
+        <div style={{ position: 'fixed', top: 140, right: 20, zIndex: 100, background: '#ef4444', color: 'white', padding: '12px 24px', borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.15)', fontWeight: 500 }}>{error}</div>
+      )}
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
@@ -129,23 +128,6 @@ const DeepAIImageModifier = () => {
             Transform your photos into stunning cartoon-style artwork using advanced AI technology
           </p>
         </div>
-        {/* API Key Warning */}
-        {(!import.meta.env.VITE_DEEPAI_API_KEY) && (
-          <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', borderRadius: '12px', padding: '20px', marginBottom: '32px', textAlign: 'center' }}>
-            <div style={{ color: '#f87171', fontSize: '18px', fontWeight: '600', marginBottom: '12px' }}>
-              🔑 API Key Required
-            </div>
-            <div style={{ color: '#cbd5e1', marginBottom: '16px' }}>
-              To use this app, you need a DeepAI API key. Get one for free at:
-            </div>
-            <a href="https://deepai.org/" target="_blank" rel="noopener noreferrer" style={{ background: 'linear-gradient(45deg, #9333ea, #3b82f6)', color: 'white', padding: '12px 24px', borderRadius: '8px', textDecoration: 'none', fontWeight: '600', display: 'inline-block' }}>
-              Get Free API Key
-            </a>
-            <div style={{ fontSize: '14px', color: '#9ca3af', marginTop: '12px' }}>
-              Then add it to the .env file as: VITE_DEEPAI_API_KEY=your_key_here
-            </div>
-          </div>
-        )}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
           {/* Upload Section */}
           <div>
@@ -187,7 +169,22 @@ const DeepAIImageModifier = () => {
               <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '16px' }}>
                 Transform Your Image
               </h3>
-              <button onClick={handleModifyImage} disabled={!image || loading} style={{ width: '100%', padding: '16px 24px', borderRadius: '12px', fontSize: '18px', fontWeight: '600', cursor: !image || loading ? 'not-allowed' : 'pointer', background: !image || loading ? '#6b7280' : 'linear-gradient(45deg, #9333ea, #3b82f6)', color: 'white', border: 'none', transition: 'all 0.3s ease' }}>
+              <button 
+                onClick={handleModifyImage} 
+                disabled={!image || loading || !isApiKeyValid()} 
+                style={{ 
+                  width: '100%', 
+                  padding: '16px 24px', 
+                  borderRadius: '12px', 
+                  fontSize: '18px', 
+                  fontWeight: '600', 
+                  cursor: (!image || loading || !isApiKeyValid()) ? 'not-allowed' : 'pointer', 
+                  background: (!image || loading || !isApiKeyValid()) ? '#6b7280' : 'linear-gradient(45deg, #9333ea, #3b82f6)', 
+                  color: 'white', 
+                  border: 'none', 
+                  transition: 'all 0.3s ease' 
+                }}
+              >
                 {loading ? 'Processing...' : 'Cartoonify Now!'}
               </button>
             </div>
@@ -195,19 +192,8 @@ const DeepAIImageModifier = () => {
             {loading && (
               <div style={{ background: 'rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255, 255, 255, 0.2)', borderRadius: '16px', padding: '24px', marginTop: '24px', textAlign: 'center' }}>
                 <div style={{ width: '48px', height: '48px', border: '4px solid rgba(255, 255, 255, 0.3)', borderTop: '4px solid #9333ea', borderRadius: '50%', margin: '0 auto 16px', animation: 'spin 1s linear infinite' }}></div>
-                <p style={{ color: '#cbd5e1' }}>Processing your image...</p>
+                <p style={{ color: '#cbd5e1' }}>{processingStep || 'Processing your image...'}</p>
                 <p style={{ fontSize: '14px', color: '#9ca3af' }}>This may take a few moments</p>
-              </div>
-            )}
-            {/* Error Message */}
-            {error && (
-              <div style={{ background: 'rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(10px)', border: '1px solid #ef4444', borderRadius: '12px', padding: '16px', marginTop: '24px' }}>
-                <div style={{ color: '#f87171', marginBottom: '8px' }}>
-                  ⚠️ {error}
-                </div>
-                <div style={{ fontSize: '14px', color: '#9ca3af' }}>
-                  💡 Tip: Try a smaller image or check your internet connection
-                </div>
               </div>
             )}
             {/* Modified Image Result */}
